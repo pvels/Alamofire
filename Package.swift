@@ -22,8 +22,15 @@
 
 import PackageDescription
 
+#if os(Linux)
+let package = Package(
+    name: "Alamofire",
+    exclude: ["Tests", "Source/NetworkReachabilityManager.swift", "Source/ServerTrustPolicy.swift"]
+)
+#else
 let package = Package(
     name: "Alamofire",
     dependencies : [],
     exclude: ["Tests"]
 )
+#endif
