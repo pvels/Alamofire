@@ -26,10 +26,6 @@ import CoreFoundation
 import Dispatch
 import Foundation
 
-#if os(Linux) || os(Android) || os(Windows)
-public typealias Progress = NSProgress 
-#endif
-
 /// A type that can inspect and optionally adapt a `URLRequest` in some manner if necessary.
 public protocol RequestAdapter {
     /// Inspects and adapts the specified `URLRequest` in some manner if necessary and returns the result.
