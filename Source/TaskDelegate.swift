@@ -29,7 +29,7 @@ import Foundation
 /// The task delegate is responsible for handling all delegate callbacks for the underlying task as well as
 /// executing all operations attached to the serial operation queue upon task completion.
 #if os(Linux) || os(Android) || os(Windows)
-open class TaskDelegate {
+open class TaskDelegate : NSObject {
         // MARK: Properties
 
     /// The serial operation queue used to execute all operations after the task completes.
@@ -105,23 +105,7 @@ open class TaskDelegate {
         if let taskDidReceiveChallenge = taskDidReceiveChallenge {
             (disposition, credential) = taskDidReceiveChallenge(session, task, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            #if os(Linux) || os(Android) || os(Windows)
-                disposition = .cancelAuthenticationChallenge
-            #else
-                let host = challenge.protectionSpace.host
-                
-                if
-                    let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
-                    let serverTrust = challenge.protectionSpace.serverTrust
-                {
-                    if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
-                        disposition = .useCredential
-                        credential = URLCredential(trust: serverTrust)
-                    } else {
-                        disposition = .cancelAuthenticationChallenge
-                    }
-                }
-            #endif
+            disposition = .cancelAuthenticationChallenge
         } else {
             if challenge.previousFailureCount > 0 {
                 disposition = .rejectProtectionSpace
@@ -160,7 +144,7 @@ open class TaskDelegate {
 
                 if
                     let downloadDelegate = self as? DownloadTaskDelegate,
-                    let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+                    let resumeData = (error as! NSError).userInfo[URLSessionDownloadTaskResumeData] as? Data
                 {
                     downloadDelegate.resumeData = resumeData
                 }
@@ -170,10 +154,10 @@ open class TaskDelegate {
         }
     }
 }
-    
+
 #else
 
-open class TaskDelegate: NSObject {   
+open class TaskDelegate: NSObject {
     // MARK: Properties
 
     /// The serial operation queue used to execute all operations after the task completes.
@@ -251,23 +235,19 @@ open class TaskDelegate: NSObject {
         if let taskDidReceiveChallenge = taskDidReceiveChallenge {
             (disposition, credential) = taskDidReceiveChallenge(session, task, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            #if os(Linux) || os(Android) || os(Windows)
-                disposition = .cancelAuthenticationChallenge
-            #else
-                let host = challenge.protectionSpace.host
-                
-                if
-                    let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
-                    let serverTrust = challenge.protectionSpace.serverTrust
-                {
-                    if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
-                        disposition = .useCredential
-                        credential = URLCredential(trust: serverTrust)
-                    } else {
-                        disposition = .cancelAuthenticationChallenge
-                    }
+            let host = challenge.protectionSpace.host
+
+            if
+                let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
+                let serverTrust = challenge.protectionSpace.serverTrust
+            {
+                if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
+                    disposition = .useCredential
+                    credential = URLCredential(trust: serverTrust)
+                } else {
+                    disposition = .cancelAuthenticationChallenge
                 }
-            #endif
+            }
         } else {
             if challenge.previousFailureCount > 0 {
                 disposition = .rejectProtectionSpace
@@ -319,7 +299,7 @@ open class TaskDelegate: NSObject {
     }
 }
 
-#endif    
+#endif
 
 // MARK: -
 
@@ -411,7 +391,11 @@ class DataTaskDelegate: TaskDelegate, URLSessionDataDelegate {
 
             let bytesReceived = Int64(data.count)
             totalBytesReceived += bytesReceived
+            #if os(Linux) || os(Android) || os(Windows)
+            let totalBytesExpected = dataTask.response?.expectedContentLength ?? URLSessionTransferSizeUnknown
+            #else
             let totalBytesExpected = dataTask.response?.expectedContentLength ?? NSURLSessionTransferSizeUnknown
+            #endif
 
             progress.totalUnitCount = totalBytesExpected
             progress.completedUnitCount = totalBytesReceived

@@ -22,6 +22,8 @@
 //  THE SOFTWARE.
 //
 
+import Dispatch
+import CoreFoundation
 import Foundation
 
 /// The type in which all data response serializers must conform to in order to serialize a response.
@@ -368,7 +370,7 @@ extension Request {
 
         var convertedEncoding = encoding
 
-        if let encodingName = response?.textEncodingName as CFString!, convertedEncoding == nil {
+        if let encodingName = response?.textEncodingName as! CFString!, convertedEncoding == nil {
             convertedEncoding = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(
                 CFStringConvertIANACharSetNameToEncoding(encodingName))
             )

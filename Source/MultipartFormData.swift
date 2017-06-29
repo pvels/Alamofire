@@ -241,7 +241,11 @@ open class MultipartFormData {
         //============================================================
 
         do {
-            let isReachable = try fileURL.checkPromisedItemIsReachable()
+            #if os(Linux) || os(Android) || os(Windows)
+                let isReachable = try fileURL.checkResourceIsReachable()
+            #else
+                let isReachable = try fileURL.checkPromisedItemIsReachable()
+            #endif
             guard isReachable else {
                 setBodyPartError(withReason: .bodyPartFileNotReachable(at: fileURL))
                 return
@@ -258,10 +262,23 @@ open class MultipartFormData {
         var isDirectory: ObjCBool = false
         let path = fileURL.path
 
-        guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) && !isDirectory.boolValue else {
+        guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        else {
             setBodyPartError(withReason: .bodyPartFileIsDirectory(at: fileURL))
             return
         }
+
+        #if os(Linux) || os(Android) || os(Windows)
+            guard !isDirectory else {
+                setBodyPartError(withReason: .bodyPartFileIsDirectory(at: fileURL))
+                return
+            }
+        #else
+            guard !isDirectory.boolValue else {
+                setBodyPartError(withReason: .bodyPartFileIsDirectory(at: fileURL))
+                return
+            }
+        #endif
 
         //============================================================
         //          Check 4 - can the file size be extracted?
@@ -536,14 +553,18 @@ open class MultipartFormData {
     // MARK: - Private - Mime Type
 
     private func mimeType(forPathExtension pathExtension: String) -> String {
-        if
-            let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
-            let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue()
-        {
-            return contentType as String
-        }
+        #if os(Linux) || os(Android) || os(Windows)
+            return MimeType(pathExtension, default: "application/octet-stream")
+        #else
+            if
+                let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
+                let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue()
+            {
+                return contentType as String
+            }
 
-        return "application/octet-stream"
+            return "application/octet-stream"
+        #endif
     }
 
     // MARK: - Private - Content Headers

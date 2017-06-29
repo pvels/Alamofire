@@ -630,15 +630,19 @@ open class UploadRequest: DataRequest {
 open class StreamRequest: Request {
     enum Streamable: TaskConvertible {
         case stream(hostName: String, port: Int)
-        
+
         func task(session: URLSession, adapter: RequestAdapter?, queue: DispatchQueue) throws -> URLSessionTask {
             let task: URLSessionTask
 
             switch self {
             case let .stream(hostName, port):
-                task = queue.syncResult { session.streamTask(withHostName: hostName, port: port) }
+                #if os(Linux) || os(Android) || os(Windows)
+                    task = queue.sync { session.streamTask(withHostName: hostName, port: port) }
+                #else
+                    task = queue.syncResult { session.streamTask(withHostName: hostName, port: port) }
+                #endif
             }
-            
+
             return task
         }
     }
@@ -652,7 +656,7 @@ open class StreamRequest: Request {
     enum Streamable: TaskConvertible {
         case stream(hostName: String, port: Int)
         case netService(NetService)
-        
+
         func task(session: URLSession, adapter: RequestAdapter?, queue: DispatchQueue) throws -> URLSessionTask {
             let task: URLSessionTask
 
@@ -662,7 +666,7 @@ open class StreamRequest: Request {
             case let .netService(netService):
                 task = queue.sync { session.streamTask(with: netService) }
             }
-            
+
             return task
         }
     }

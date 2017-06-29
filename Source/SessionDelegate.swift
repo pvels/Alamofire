@@ -22,6 +22,7 @@
 //  THE SOFTWARE.
 //
 
+import Dispatch
 import Foundation
 
 /// Responsible for handling all delegate callbacks for the underlying session.
@@ -186,7 +187,7 @@ open class SessionDelegate: NSObject {
     public override init() {
         super.init()
     }
-    
+
 #if !os(Linux) && !os(Android) && !os(Windows)
     // MARK: NSObject Overrides
 
@@ -270,12 +271,12 @@ extension SessionDelegate: URLSessionDelegate {
         if let sessionDidReceiveChallenge = sessionDidReceiveChallenge {
             (disposition, credential) = sessionDidReceiveChallenge(session, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            
+
             #if os(Linux) || os(Android) || os(Windows)
                 disposition = .cancelAuthenticationChallenge
             #else
                 let host = challenge.protectionSpace.host
-                
+
                 if
                     let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
                     let serverTrust = challenge.protectionSpace.serverTrust
@@ -420,7 +421,7 @@ extension SessionDelegate: URLSessionTaskDelegate {
         }
     }
 
-#if !os(watchOS)
+#if !os(watchOS) && !os(Linux) && !os(Android) && !os(Windows)
 
     /// Tells the delegate that the session finished collecting metrics for the task.
     ///
