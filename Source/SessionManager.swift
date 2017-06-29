@@ -96,6 +96,10 @@ open class SessionManager {
                             return "OS X"
                         #elseif os(Linux)
                             return "Linux"
+                        #elseif os(Android)
+                            return "Android"
+                        #elseif os (Windows)
+                            return "Windows"
                         #else
                             return "Unknown"
                         #endif
@@ -807,7 +811,7 @@ open class SessionManager {
     open func stream(withHostName hostName: String, port: Int) -> StreamRequest {
         return stream(.stream(hostName: hostName, port: port))
     }
-#if !os(Linux)
+#if !os(Linux) && !os(Android) && !os(Windows)
     // MARK: NetService
 
     /// Creates a `StreamRequest` for bidirectional streaming using the `netService`.

@@ -447,7 +447,7 @@ public func stream(withHostName hostName: String, port: Int) -> StreamRequest {
     return SessionManager.default.stream(withHostName: hostName, port: port)
 }
 
-#if !os(Linux)
+#if !os(Linux) && !os(Android) && !os(Windows)
 // MARK: NetService
 
 /// Creates a `StreamRequest` using the default `SessionManager` for bidirectional streaming with the `netService`.

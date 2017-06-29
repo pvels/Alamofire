@@ -26,7 +26,7 @@ import CoreFoundation
 import Dispatch
 import Foundation
 
-#if os(Linux) 
+#if os(Linux) || os(Android) || os(Windows)
 public typealias Progress = NSProgress 
 #endif
 
@@ -628,7 +628,7 @@ open class UploadRequest: DataRequest {
 
 #if !os(watchOS)
 
-#if os(Linux)
+#if os(Linux) || os(Android) || os(Windows)
 
 /// Specific type of `Request` that manages an underlying `URLSessionStreamTask`.
 open class StreamRequest: Request {

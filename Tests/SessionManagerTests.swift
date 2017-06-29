@@ -234,6 +234,10 @@ class SessionManagerTestCase: BaseTestCase {
                     return "OS X"
                 #elseif os(Linux)
                     return "Linux"
+                #elseif os(Android)
+                    return "Android"
+                #elseif os (Windows)
+                    return "Windows"
                 #else
                     return "Unknown"
                 #endif

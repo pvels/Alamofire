@@ -28,7 +28,7 @@ import Foundation
 
 /// The task delegate is responsible for handling all delegate callbacks for the underlying task as well as
 /// executing all operations attached to the serial operation queue upon task completion.
-#if os(Linux)
+#if os(Linux) || os(Android) || os(Windows)
 open class TaskDelegate {
         // MARK: Properties
 

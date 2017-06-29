@@ -187,7 +187,7 @@ open class SessionDelegate: NSObject {
         super.init()
     }
     
-#if !os(Linux)
+#if !os(Linux) && !os(Android) && !os(Windows)
     // MARK: NSObject Overrides
 
     /// Returns a `Bool` indicating whether the `SessionDelegate` implements or inherits a method that can respond
