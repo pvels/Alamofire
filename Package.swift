@@ -22,7 +22,7 @@
 
 import PackageDescription
 
-#if os(Linux)
+#if os(Linux) || os(Android) || os(Windows)
 let package = Package(
     name: "Alamofire",
     exclude: ["Tests", "Source/NetworkReachabilityManager.swift", "Source/ServerTrustPolicy.swift"]
