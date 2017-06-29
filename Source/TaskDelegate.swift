@@ -105,19 +105,23 @@ open class TaskDelegate {
         if let taskDidReceiveChallenge = taskDidReceiveChallenge {
             (disposition, credential) = taskDidReceiveChallenge(session, task, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            let host = challenge.protectionSpace.host
-
-            if
-                let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
-                let serverTrust = challenge.protectionSpace.serverTrust
-            {
-                if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
-                    disposition = .useCredential
-                    credential = URLCredential(trust: serverTrust)
-                } else {
-                    disposition = .cancelAuthenticationChallenge
+            #if os(Linux) || os(Android) || os(Windows)
+                disposition = .cancelAuthenticationChallenge
+            #else
+                let host = challenge.protectionSpace.host
+                
+                if
+                    let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
+                    let serverTrust = challenge.protectionSpace.serverTrust
+                {
+                    if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
+                        disposition = .useCredential
+                        credential = URLCredential(trust: serverTrust)
+                    } else {
+                        disposition = .cancelAuthenticationChallenge
+                    }
                 }
-            }
+            #endif
         } else {
             if challenge.previousFailureCount > 0 {
                 disposition = .rejectProtectionSpace
@@ -247,19 +251,23 @@ open class TaskDelegate: NSObject {
         if let taskDidReceiveChallenge = taskDidReceiveChallenge {
             (disposition, credential) = taskDidReceiveChallenge(session, task, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            let host = challenge.protectionSpace.host
-
-            if
-                let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
-                let serverTrust = challenge.protectionSpace.serverTrust
-            {
-                if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
-                    disposition = .useCredential
-                    credential = URLCredential(trust: serverTrust)
-                } else {
-                    disposition = .cancelAuthenticationChallenge
+            #if os(Linux) || os(Android) || os(Windows)
+                disposition = .cancelAuthenticationChallenge
+            #else
+                let host = challenge.protectionSpace.host
+                
+                if
+                    let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
+                    let serverTrust = challenge.protectionSpace.serverTrust
+                {
+                    if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
+                        disposition = .useCredential
+                        credential = URLCredential(trust: serverTrust)
+                    } else {
+                        disposition = .cancelAuthenticationChallenge
+                    }
                 }
-            }
+            #endif
         } else {
             if challenge.previousFailureCount > 0 {
                 disposition = .rejectProtectionSpace

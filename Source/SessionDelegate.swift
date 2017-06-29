@@ -270,19 +270,24 @@ extension SessionDelegate: URLSessionDelegate {
         if let sessionDidReceiveChallenge = sessionDidReceiveChallenge {
             (disposition, credential) = sessionDidReceiveChallenge(session, challenge)
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-            let host = challenge.protectionSpace.host
-
-            if
-                let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
-                let serverTrust = challenge.protectionSpace.serverTrust
-            {
-                if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
-                    disposition = .useCredential
-                    credential = URLCredential(trust: serverTrust)
-                } else {
-                    disposition = .cancelAuthenticationChallenge
+            
+            #if os(Linux) || os(Android) || os(Windows)
+                disposition = .cancelAuthenticationChallenge
+            #else
+                let host = challenge.protectionSpace.host
+                
+                if
+                    let serverTrustPolicy = session.serverTrustPolicyManager?.serverTrustPolicy(forHost: host),
+                    let serverTrust = challenge.protectionSpace.serverTrust
+                {
+                    if serverTrustPolicy.evaluate(serverTrust, forHost: host) {
+                        disposition = .useCredential
+                        credential = URLCredential(trust: serverTrust)
+                    } else {
+                        disposition = .cancelAuthenticationChallenge
+                    }
                 }
-            }
+            #endif
         }
 
         completionHandler(disposition, credential)

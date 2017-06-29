@@ -205,7 +205,9 @@ open class SessionManager {
     }
 
     private func commonInit(serverTrustPolicyManager: ServerTrustPolicyManager?) {
-        session.serverTrustPolicyManager = serverTrustPolicyManager
+        #if !os(Linux) && !os(Android) && !os(Windows)
+            session.serverTrustPolicyManager = serverTrustPolicyManager
+        #endif
 
         delegate.sessionManager = self
 

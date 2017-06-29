@@ -31,6 +31,6 @@ let package = Package(
 let package = Package(
     name: "Alamofire",
     dependencies : [],
-    exclude: ["Tests"]
+    exclude: ["Tests", "Source/ServerTrustPolicyPlaceholder.swift"]
 )
 #endif
