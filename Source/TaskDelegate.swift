@@ -392,7 +392,7 @@ class DataTaskDelegate: TaskDelegate, URLSessionDataDelegate {
             let bytesReceived = Int64(data.count)
             totalBytesReceived += bytesReceived
             #if os(Linux) || os(Android) || os(Windows)
-            let totalBytesExpected = dataTask.response?.expectedContentLength ?? URLSessionTransferSizeUnknown
+            let totalBytesExpected = dataTask.response?.expectedContentLength ?? NSURLSessionTransferSizeUnknown
             #else
             let totalBytesExpected = dataTask.response?.expectedContentLength ?? NSURLSessionTransferSizeUnknown
             #endif

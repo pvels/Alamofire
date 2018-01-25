@@ -43,6 +43,15 @@ import CoreServices
 /// - https://www.ietf.org/rfc/rfc2388.txt
 /// - https://www.ietf.org/rfc/rfc2045.txt
 /// - https://www.w3.org/TR/html401/interact/forms.html#h-17.13
+
+func arc4random() -> UInt32 {
+    #if os(Linux)
+        return UInt32(random())
+    #else
+        return Darwin.arc4random()
+    #endif
+}
+
 open class MultipartFormData {
 
     // MARK: - Helper Types
